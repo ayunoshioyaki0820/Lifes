@@ -95,7 +95,7 @@ namespace Lifes
 
                 for (int i = 0; i < menuItems.Length; i++)
                 {
-                    var text = menuItems[i];
+                    var text = (i == selectedIndex) ? ">" + menuItems[i] : menuItems[i];
                     var color = (i == selectedIndex) ? Color.Yellow : Color.Gray;
                     var size = pixelFont.MeasureString(text) * 2;
                     _spriteBatch.DrawString(pixelFont, text, new Vector2(centerX - size.X / 2, centerY + 20 + i * 50), color, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);

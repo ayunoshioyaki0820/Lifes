@@ -1,12 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lifes
 {
@@ -20,6 +16,7 @@ namespace Lifes
     public class MainGame
     {
         private List<Creature> creatures = new List<Creature>();
+        private List<Food> foods = new List<Food>();
         private double evolveTimer = 0;
         private GraphicsDevice graphicsDevice;
         public SpriteFont pixelFont;
@@ -29,29 +26,64 @@ namespace Lifes
             graphicsDevice = device;
             for (int i = 0; i < 10; i++)
                 creatures.Add(new Creature(20, graphicsDevice));
+            for (int i = 0; i < 5; i++)
+                foods.Add(new Food("Apple", 50, 30, new byte[,] {
+                    { 0,1,1,0 },
+                    { 1,1,1,1 },
+                    { 1,1,1,1 },
+                    { 0,1,1,0 }
+                }, graphicsDevice));
         }
+        private float testCountes = 0f;
 
         public void Update(GameTime gameTime)
         {
             foreach (var c in creatures)
+            {
                 c.Update(gameTime);
+                if (!c.IsAlive)
+                {
+                    creatures.Remove(c);
+                    break;
+                }
+            }
+            
+
+            foreach (var f in foods)
+                f.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             evolveTimer += gameTime.ElapsedGameTime.TotalSeconds;
             if (evolveTimer > 5)
             {
-                var newGen = new List<Creature>();
-                foreach (var c in creatures)
-                    newGen.Add(new Creature(creatures[0], creatures[1], graphicsDevice));
-                creatures.RemoveAll(c => !c.IsAlive);
-                creatures = newGen;
+                creatures.Add(new Creature(creatures[0], creatures[1], graphicsDevice));
                 evolveTimer = 0;
             }
+            // デバッグ情報の表示
+            testCountes += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (testCountes > 1f)
+            {
+                Console.WriteLine($"Creatures: {creatures.Count}, Foods: {foods.Count}");
+
+                // 位置情報を文字列でまとめる
+                var positions = creatures
+                    .Select(c => $"({(int)c.Position.X}, {(int)c.Position.Y})")
+                    .ToList();
+
+                Console.WriteLine("Creature positions: " + string.Join(", ", positions));
+
+                testCountes = 0f;
+            }
+
+
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             foreach (var c in creatures)
                 c.Draw(spriteBatch);
+
+            foreach (var f in foods)
+                f.Draw(spriteBatch);
         }
     }
 

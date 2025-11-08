@@ -32,7 +32,7 @@ class Creature
     public Color Color2; // (★追加) アクセント色
     public float Size;
     public float Speed;
-    public float MutationRate; // (現在DNAから設定されていませんが、将来的に拡張可能です)
+    //public float MutationRate; // (現在DNAから設定されていませんが、将来的に拡張可能です)
     public byte[,] looks; // 見た目 (テクスチャデータ)
     public Codon[] Dna { get; private set; }
     public string[] parents;
@@ -151,7 +151,7 @@ class Creature
         this.Color2 = Color.White; // (★アクセント色)
         this.Size = 8f;
         this.Speed = 1.0f;
-        this.Position = new Vector2(_rand.Next(800), _rand.Next(600));
+        this.Position = new Vector2(_rand.Next(800), _rand.Next(480));
         this.MaxAge = 1000f;
         this.CurrentAge = 0f;
         this.IsAlive = true;
@@ -192,7 +192,7 @@ class Creature
         if (dna.Length > 4)
         {
             float lifeValue = (float)((byte)dna[4].B1 + (byte)dna[4].B2 + (byte)dna[4].B3);
-            this.MaxAge = 500f + (lifeValue * 100f);
+            this.MaxAge = 5f + (lifeValue * 2f);
         }
 
         // 6番目のコドン (dna[5]) でテクスチャサイズを決定
