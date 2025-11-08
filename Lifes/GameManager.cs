@@ -78,8 +78,20 @@ namespace Lifes
                     currentState = GameState.Menu;
             }
 
-            if (key.IsKeyDown(Keys.F11) && _previousKeyboardState.IsKeyUp(Keys.F11) )
-                _graphics.ToggleFullScreen();
+            if (key.IsKeyDown(Keys.F11) && _previousKeyboardState.IsKeyUp(Keys.F11)){
+                _graphics.IsFullScreen = !_graphics.IsFullScreen;
+                if (_graphics.IsFullScreen)
+                {
+                    _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+                    _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+                }
+                else
+                {
+                    _graphics.PreferredBackBufferWidth = 800;
+                    _graphics.PreferredBackBufferHeight = 450;
+                }
+                _graphics.ApplyChanges();
+            }
 
             _previousKeyboardState = key;
             base.Update(gameTime);
