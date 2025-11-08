@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace Lifes
 {
-    internal class UIManager
+    public class UIManager
     {
+        public UIManager()
+        {
 
+        }
     }
 }

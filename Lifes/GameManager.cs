@@ -21,6 +21,8 @@ namespace Lifes
         private string[] menuItems = { "Start", "Exit" };
 
         private MainGame game;
+        Camera _camera;
+        private KeyboardState _previousKeyboardState;
 
         public GameManager()
         {
@@ -45,6 +47,7 @@ namespace Lifes
             pixelFontTitle = Content.Load<SpriteFont>("PixelFontTitle");
 
             game = new MainGame(GraphicsDevice);
+            _camera = new Camera();
         }
 
         protected override void Update(GameTime gameTime)
@@ -69,11 +72,16 @@ namespace Lifes
             else if (currentState == GameState.Playing)
             {
                 game.Update(gameTime);
+                _camera.Update(gameTime);
 
                 if (key.IsKeyDown(Keys.Escape))
                     currentState = GameState.Menu;
             }
 
+            if (key.IsKeyDown(Keys.F11) && _previousKeyboardState.IsKeyUp(Keys.F11) )
+                _graphics.ToggleFullScreen();
+
+            _previousKeyboardState = key;
             base.Update(gameTime);
         }
 
@@ -81,13 +89,14 @@ namespace Lifes
         {
             GraphicsDevice.Clear(Color.Black); // 背景色をクリア
 
-            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-
-            var centerX = _graphics.PreferredBackBufferWidth / 2;
-            var centerY = _graphics.PreferredBackBufferHeight / 2;
+            
 
             if (currentState == GameState.Menu)
             {
+                _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
+                var centerX = _graphics.PreferredBackBufferWidth / 2;
+                var centerY = _graphics.PreferredBackBufferHeight / 2;
 
                 var title = "Lifes";
                 var titleSize = pixelFontTitle.MeasureString(title);
@@ -100,14 +109,17 @@ namespace Lifes
                     var size = pixelFont.MeasureString(text) * 2;
                     _spriteBatch.DrawString(pixelFont, text, new Vector2(centerX - size.X / 2, centerY + 20 + i * 50), color, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
                 }
+
+                _spriteBatch.End();
             }
             else if (currentState == GameState.Playing)
             {
+                _spriteBatch.Begin(transformMatrix: _camera.GetViewMatrix(_graphics));
                 // ゲーム画面描画
                 game.Draw(_spriteBatch);
-            }
 
-            _spriteBatch.End();
+                _spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }
