@@ -33,9 +33,9 @@ namespace Lifes
                 Rotation += 0.02f;
 
             // + / - でズーム
-            if (keyboard.IsKeyDown(Keys.OemPlus) || keyboard.IsKeyDown(Keys.Add))
+            if (keyboard.IsKeyDown(Keys.OemPeriod))
                 Zoom += ZoomSpeed;
-            if (keyboard.IsKeyDown(Keys.OemMinus) || keyboard.IsKeyDown(Keys.Subtract))
+            if (keyboard.IsKeyDown(Keys.OemComma))
                 Zoom -= ZoomSpeed;
 
             // ズーム値の制限

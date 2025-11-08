@@ -73,9 +73,10 @@ namespace Lifes
             {
                 game.Update(gameTime);
                 _camera.Update(gameTime);
-
                 if (key.IsKeyDown(Keys.Escape))
+                {
                     currentState = GameState.Menu;
+                }
             }
 
             if (key.IsKeyDown(Keys.F11) && _previousKeyboardState.IsKeyUp(Keys.F11)){
@@ -91,6 +92,7 @@ namespace Lifes
                     _graphics.PreferredBackBufferHeight = 450;
                 }
                 _graphics.ApplyChanges();
+                GraphicsDevice.Clear(Color.Black);
             }
 
             _previousKeyboardState = key;
@@ -126,7 +128,7 @@ namespace Lifes
             }
             else if (currentState == GameState.Playing)
             {
-                _spriteBatch.Begin(transformMatrix: _camera.GetViewMatrix(_graphics));
+                _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _camera.GetViewMatrix(_graphics));
                 // ゲーム画面描画
                 game.Draw(_spriteBatch);
 
