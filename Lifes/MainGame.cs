@@ -105,14 +105,7 @@ namespace Lifes
 
 
 
-            for (int x = 0; x < world.Width; x++)
-                for (int y = 0; y < world.Height; y++)
-                {
-                    TerrainType type = world.GetTerrain(x, y);
-                    Color c = GetColorByTerrain(type);
-                    Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
-                    spriteBatch.Draw(pixel, rect, c);
-                }
+            
         }
     }
 
