@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +22,7 @@ namespace Lifes
         private List<Creature> creatures = new List<Creature>();
         private double evolveTimer = 0;
         private GraphicsDevice graphicsDevice;
+        public SpriteFont pixelFont;
 
         public MainGame(GraphicsDevice device)
         {
@@ -31,7 +34,7 @@ namespace Lifes
         public void Update(GameTime gameTime)
         {
             foreach (var c in creatures)
-                c.Update();
+                c.Update(gameTime);
 
             evolveTimer += gameTime.ElapsedGameTime.TotalSeconds;
             if (evolveTimer > 5)
@@ -39,6 +42,7 @@ namespace Lifes
                 var newGen = new List<Creature>();
                 foreach (var c in creatures)
                     newGen.Add(new Creature(creatures[0], creatures[1], graphicsDevice));
+                creatures.RemoveAll(c => !c.IsAlive);
                 creatures = newGen;
                 evolveTimer = 0;
             }

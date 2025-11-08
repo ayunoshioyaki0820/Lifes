@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Linq;
+using System.Linq; // (将来的に使うかもしれないので残しておきます)
 
 class Creature
 {
@@ -24,198 +24,302 @@ class Creature
             this.B2 = b2;
             this.B3 = b3;
         }
-
     }
 
+    // --- プロパティ ---
     public Vector2 Position;
-    public Color Color;
+    public Color Color; // 基本色
+    public Color Color2; // (★追加) アクセント色
     public float Size;
     public float Speed;
-    public float MutationRate;
-    public byte[,] looks;
+    public float MutationRate; // (現在DNAから設定されていませんが、将来的に拡張可能です)
+    public byte[,] looks; // 見た目 (テクスチャデータ)
     public Codon[] Dna { get; private set; }
     public string[] parents;
-    public string id;
+    public string id; // 個体識別ID
+    // 寿命系
+    public float MaxAge { get; private set; }
+    public float CurrentAge { get; private set; }
+    public bool IsAlive { get; private set; }
 
-    private Texture2D texture;
+    public Texture2D Texture; // (public に変更しました。Drawで使うため)
 
-    // 乱数生成器 (MonoGameのGameクラスなどで一つだけ生成し、コンストラクタで渡すのが望ましい)
+    // 乱数生成器 (一つに統一)
     private static Random _rand = new Random();
 
-    // 突然変異率 (例: 1% の確率で塩基が変化する)
+    // 突然変異率
     private const double MUTATION_RATE = 0.01;
 
-    // 両親から新しいCreatureを生成するコンストラクタ
-    // Creatureのコンストラクタ
+    // ----------------------------------------------------
+    // (1) 両親から新しいCreatureを生成するコンストラクタ
+    // ----------------------------------------------------
     public Creature(Creature parent1, Creature parent2, GraphicsDevice device)
     {
-        // 親のDNA長が異なる場合の安全策 (短い方に合わせる)
+        // --- 1. IDと親情報の生成 ---
+        this.id = Guid.NewGuid().ToString(); // ユニークID
+        this.parents = new string[2] { parent1.id, parent2.id };
+
+        // --- 2. DNAの生成 (交叉・突然変異) ---
         int len1 = parent1.Dna.Length;
         int len2 = parent2.Dna.Length;
 
         if (len1 != len2)
         {
-            // DNA長が異なる場合の交叉は少し工夫が必要
-            // ここでは単純化のため、短い方のDNA配列を基準にします
             Codon[] shorterDna = (len1 < len2) ? parent1.Dna : parent2.Dna;
             Codon[] longerDna = (len1 < len2) ? parent2.Dna : parent1.Dna;
-
-            // 短い方の長さに合わせて切り詰めた配列を渡す
             Codon[] adjustedLongerDna = new Codon[shorterDna.Length];
             Array.Copy(longerDna, adjustedLongerDna, shorterDna.Length);
-
             this.Dna = GenerateDna(shorterDna, adjustedLongerDna);
         }
         else
         {
-            // 長さが同じ場合
             this.Dna = GenerateDna(parent1.Dna, parent2.Dna);
         }
 
+        // --- 3. DNAの翻訳 (特性決定) ---
         DecodeDna(Dna);
-        parents = new string[2] { parent1.id, parent2.id };
-        Texture = GenerateDotTexture(looks, device);
+
+        // --- 4. テクスチャの生成 ---
+        // (DecodeDna で looks が決定した後に実行)
+        this.Texture = GenerateDotTexture(looks, device);
     }
 
-    // (DNAをランダムに生成する初期個体用のコンストラクタも必要)
+    // ----------------------------------------------------
+    // (2) ランダムな初期個体を生成するコンストラクタ
+    // ----------------------------------------------------
     public Creature(int initialDnaLength, GraphicsDevice device)
     {
+        // --- 1. IDと親情報の生成 ---
+        this.id = Guid.NewGuid().ToString(); // ユニークID
+        this.parents = new string[2] { "ROOT", "ROOT" }; // 親なし(初期個体)
+
+        // --- 2. ランダムなDNAの生成 ---
         this.Dna = new Codon[initialDnaLength];
         for (int i = 0; i < initialDnaLength; i++)
         {
             this.Dna[i] = new Codon(
-                (Base)rand.Next(4),
-                (Base)rand.Next(4),
-                (Base)rand.Next(4)
+                (Base)_rand.Next(4), // (★ rand から _rand に修正)
+                (Base)_rand.Next(4),
+                (Base)_rand.Next(4)
             );
         }
 
+        // --- 3. DNAの翻訳 (特性決定) ---
         DecodeDna(Dna);
-        Texture = GenerateDotTexture(looks, device);
+
+        // --- 4. テクスチャの生成 ---
+        this.Texture = GenerateDotTexture(looks, device);
     }
 
+    // ----------------------------------------------------
+    // DNAの交叉と突然変異
+    // ----------------------------------------------------
     private static Codon[] GenerateDna(Codon[] dna1, Codon[] dna2)
     {
-        // DNAの長さ (両親で同じと仮定。異なる場合は短い方に合わせるなどルールが必要)
         int dnaLength = dna1.Length;
         Codon[] newDna = new Codon[dnaLength];
-        int crossoverPoint = _rand.Next(1, dnaLength - 1);
 
+        // (DNA長が 1 の場合 _rand.Next(1, 0) となりエラーになるため最小値を設定)
+        int crossoverPoint = (dnaLength > 1) ? _rand.Next(1, dnaLength - 1) : 0;
+
+        // ステップ1: 交叉
         for (int i = 0; i < dnaLength; i++)
         {
-            if (i < crossoverPoint)
-            {
-                newDna[i] = dna1[i];
-            }
-            else
-            {
-                newDna[i] = dna2[i];
-            }
+            newDna[i] = (i < crossoverPoint) ? dna1[i] : dna2[i];
         }
+
+        // ステップ2: 突然変異
         for (int i = 0; i < newDna.Length; i++)
         {
-            // B1 塩基の突然変異
-            if (_rand.NextDouble() < MUTATION_RATE)
-            {
-                newDna[i].B1 = (Base)_rand.Next(4); // 0～3 (A,T,G,C) のランダムな値
-            }
-
-            // B2 塩基の突然変異
-            if (_rand.NextDouble() < MUTATION_RATE)
-            {
-                newDna[i].B2 = (Base)_rand.Next(4);
-            }
-
-            // B3 塩基の突然変異
-            if (_rand.NextDouble() < MUTATION_RATE)
-            {
-                newDna[i].B3 = (Base)_rand.Next(4);
-            }
+            if (_rand.NextDouble() < MUTATION_RATE) newDna[i].B1 = (Base)_rand.Next(4);
+            if (_rand.NextDouble() < MUTATION_RATE) newDna[i].B2 = (Base)_rand.Next(4);
+            if (_rand.NextDouble() < MUTATION_RATE) newDna[i].B3 = (Base)_rand.Next(4);
         }
 
         return newDna;
     }
 
 
-    public Texture2D Texture;
-
-    private static Random rand = new Random();
-
-    private Texture2D GenerateDotTexture(byte[,] tecstures ,GraphicsDevice device)
-    {
-        Color[] data = new Color[tecstures.Length];
-
-        for (int i = 0; i < data.Length; i++)
-        {
-            data[i] = rand.NextDouble() > 0.5 ? Color : Color.Transparent;
-        }
-
-        Texture2D tex = new Texture2D(device, tecstures.GetLength(0), tecstures.GetLength(1));
-        tex.SetData(data);
-        return tex;
-    }
-
-    // DNAを翻訳し、生物の特性（見た目、能力）を決定するメソッド
-    // (引数として dna を受け取るように変更)
+    // ----------------------------------------------------
+    // DNAの翻訳 (特性デコード)
+    // (★可変サイズ＆左右対称に対応)
+    // ----------------------------------------------------
     private void DecodeDna(Codon[] dna)
     {
-        // --- これはあくまで「設計例」です ---
-
-        // デフォルト値の設定（DNAが短すぎる場合など）
+        // デフォルト値
         this.Color = Color.Gray;
+        this.Color2 = Color.White; // (★アクセント色)
         this.Size = 8f;
         this.Speed = 1.0f;
-        this.Position = new Vector2(_rand.Next(800), _rand.Next(600)); // _rand は統一済みのRandomインスタンス
+        this.Position = new Vector2(_rand.Next(800), _rand.Next(600));
+        this.MaxAge = 1000f;
+        this.CurrentAge = 0f;
+        this.IsAlive = true;
 
-        // 例1: 最初のコドンで基本色を決める
+        // 例1: 最初のコドン (dna[0]) で基本色
         if (dna.Length > 0)
         {
-            // 3塩基(0～3)の値をR,G,Bに割り当て (0～192の範囲)
             byte r = (byte)((byte)dna[0].B1 * 64);
             byte g = (byte)((byte)dna[0].B2 * 64);
             byte b = (byte)((byte)dna[0].B3 * 64);
             this.Color = new Color(r, g, b);
         }
 
-        // 例2: 2番目のコドンでサイズを決める
+        // 例2: 2番目のコドン (dna[1]) でサイズ
         if (dna.Length > 1)
         {
-            // 3塩基の合計値 (0～9) をサイズに反映
             float sizeValue = (float)((byte)dna[1].B1 + (byte)dna[1].B2 + (byte)dna[1].B3);
-            this.Size = 5.0f + sizeValue; // 5.0～14.0 のサイズ
+            this.Size = 5.0f + sizeValue;
         }
 
-        // 例3: 3番目のコドンでスピードを決める
+        // 例3: 3番目のコドン (dna[2]) でスピード
         if (dna.Length > 2)
         {
             float speedValue = (float)((byte)dna[2].B1 + (byte)dna[2].B2 + (byte)dna[2].B3);
-            this.Speed = 0.5f + (speedValue / 10.0f); // 0.5～1.4 のスピード
+            this.Speed = 0.5f + (speedValue / 10.0f);
         }
 
-        // 4-20番目のコドンで見た目を決める
-        if (dna.Length > 19)
+        // 4番目のコドン (dna[3]) でアクセント色
+        if (dna.Length > 3)
         {
-            byte[,] textureData = new byte[4, 4];
-            for (int i = 0; i < 4; i++)
+            byte r = (byte)((byte)dna[3].B3 * 64); // 基本色とRGBの順番を変えてみる
+            byte g = (byte)((byte)dna[3].B2 * 64);
+            byte b = (byte)((byte)dna[3].B1 * 64);
+            this.Color2 = new Color(r, g, b);
+        }
+
+        // 5番目のコドン (dna[4]) で寿命
+        if (dna.Length > 4)
+        {
+            float lifeValue = (float)((byte)dna[4].B1 + (byte)dna[4].B2 + (byte)dna[4].B3);
+            this.MaxAge = 500f + (lifeValue * 100f);
+        }
+
+        // 6番目のコドン (dna[5]) でテクスチャサイズを決定
+        int width = 4;
+        int height = 4;
+        if (dna.Length > 4)
+        {
+            // B1 (0～3) を使って幅を 4～7 の範囲で決定
+            width = 4 + (byte)dna[5].B1;
+            // B2 (0～3) を使って高さを 4～7 の範囲で決定
+            height = 4 + (byte)dna[5].B2;
+        }
+
+        this.looks = new byte[width, height]; // 可変サイズで配列を初期化
+
+        // 7番目以降のコドンで見た目(looks)を左右対称に決定
+
+        // 必要なコドン数 (左右対称なので幅の半分(切り上げ))
+        int halfWidth = (int)Math.Ceiling(width / 2.0);
+        int requiredCodonsForLooks = halfWidth * height;
+
+        // looks の DNA はインデックス 5 から読み取る
+        int looksDnaStartIndex = 6;
+
+        if (dna.Length > looksDnaStartIndex + requiredCodonsForLooks)
+        {
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < 4; j++)
+                // 左半分をDNAから決定
+                for (int x = 0; x < halfWidth; x++)
                 {
-                    textureData[i,j] = (byte)dna[4*i + j].B1;
+                    int codonIndex = looksDnaStartIndex + (y * halfWidth) + x;
+                    // B1 (0～3) を looks の値として使う
+                    this.looks[x, y] = (byte)dna[codonIndex].B1;
+                }
+
+                // 右半分を反転コピー (★左右対称)
+                for (int x = halfWidth; x < width; x++)
+                {
+                    int mirroredX = width - 1 - x;
+                    this.looks[x, y] = this.looks[mirroredX, y];
                 }
             }
-            this.looks = textureData;
         }
+        // (DNAが足りない場合は、new byte[,] で初期化された 0 (透明) のままになる)
     }
 
-    public void Update()
+    private Texture2D GenerateDotTexture(byte[,] textures, GraphicsDevice device)
     {
-        Position.X += (float)(rand.NextDouble() - 0.5) * Speed * 2;
-        Position.Y += (float)(rand.NextDouble() - 0.5) * Speed * 2;
+        // (★ rand から _rand に修正)
+        // (このメソッドはもうランダム性を使わないので、以下の2行は削除してもOK)
+        // int w = _rand.Next(3, 8);
+        // int h = _rand.Next(3, 8);
+
+        // (★修正) 引数 textures のサイズをそのまま使う
+        int width = textures.GetLength(0);
+        int height = textures.GetLength(1);
+        Color[] data = new Color[width * height];
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = y * width + x;
+
+                // (★修正) looks の値 (0～3) を取得
+                byte lookValue = textures[x, y];
+
+                // (★修正) 0.5 のランダムではなく、lookValue に応じて色を決定
+                switch (lookValue)
+                {
+                    case 0:
+                        data[index] = Color.Transparent; // 0 = 透明
+                        break;
+                    case 1:
+                        data[index] = this.Color; // 1 = 基本色
+                        break;
+                    case 2:
+                        data[index] = this.Color2; // 2 = アクセント色
+                        break;
+                    case 3:
+                        // 3 = 影色 (基本色を暗くする)
+                        data[index] = new Color(this.Color.R / 2, this.Color.G / 2, this.Color.B / 2);
+                        break;
+                    default:
+                        data[index] = Color.Transparent;
+                        break;
+                }
+            }
+        }
+
+        Texture2D tex = new Texture2D(device, width, height);
+        tex.SetData(data);
+        return tex;
     }
 
+    // ----------------------------------------------------
+    // 更新
+    // ----------------------------------------------------
+    public void Update(GameTime gameTime)
+    {
+        if (!IsAlive) return;
+
+        CurrentAge += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        if(CurrentAge >= MaxAge)
+        {
+            IsAlive = false;
+            return;
+        }
+
+        // (★ rand から _rand に修正)
+        Position.X += (float)(_rand.NextDouble() - 0.5) * Speed * 2;
+        Position.Y += (float)(_rand.NextDouble() - 0.5) * Speed * 2;
+
+        
+    }
+
+    // ----------------------------------------------------
+    // 描画
+    // ----------------------------------------------------
     public void Draw(SpriteBatch spriteBatch)
     {
-        
-        spriteBatch.Draw(Texture, Position, null, Color.White, 0f, Vector2.Zero, Size / 5f, SpriteEffects.None, 0f);
+        if (IsAlive && Texture != null) // テクスチャがnullでないことを確認
+        {
+            // (Size / 5f はテクスチャサイズによって調整が必要かもしれません)
+            spriteBatch.Draw(Texture, Position, null, Color.White, 0f, Vector2.Zero, Size / 5f, SpriteEffects.None, 0f);
+        }
     }
 }

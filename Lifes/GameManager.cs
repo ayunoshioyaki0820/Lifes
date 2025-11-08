@@ -89,7 +89,7 @@ namespace Lifes
             if (currentState == GameState.Menu)
             {
 
-                var title = "LIFES";
+                var title = "Lifes";
                 var titleSize = pixelFontTitle.MeasureString(title);
                 _spriteBatch.DrawString(pixelFontTitle, title, new Vector2((float)centerX - titleSize.X, centerY - 180), Color.White, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
 
