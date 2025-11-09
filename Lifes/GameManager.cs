@@ -18,7 +18,7 @@ namespace Lifes
         private SpriteFont pixelFont, pixelFontTitle;
 
         private int selectedIndex = 0;
-        private string[] menuItems = { "Start", "Exit" };
+        private string[] menuItems = { "NewGame", "Continue", "Exit" };
 
         private MainGame game;
         Camera _camera;
@@ -56,16 +56,24 @@ namespace Lifes
 
             if (currentState == GameState.Menu)
             {
-                if (key.IsKeyDown(Keys.Up))
-                    selectedIndex = 0;
-                if (key.IsKeyDown(Keys.Down))
-                    selectedIndex = 1;
+                if (key.IsKeyDown(Keys.Up) && _previousKeyboardState.IsKeyUp(Keys.Up))
+                {
+                    selectedIndex += -1;
+                    if (selectedIndex < 0)
+                        selectedIndex = menuItems.Length - 1;
+                }
+                if (key.IsKeyDown(Keys.Down) && _previousKeyboardState.IsKeyUp(Keys.Down))
+                {
+                    selectedIndex += 1;
+                    if (selectedIndex >= menuItems.Length)
+                        selectedIndex = 0;
+                }
 
-                if (key.IsKeyDown(Keys.Enter))
+                if (key.IsKeyDown(Keys.Enter) && _previousKeyboardState.IsKeyUp(Keys.Enter))
                 {
                     if (selectedIndex == 0)
                         currentState = GameState.Playing;
-                    else if (selectedIndex == 1)
+                    else if (selectedIndex == 2)
                         Exit();
                 }
             }

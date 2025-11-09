@@ -24,19 +24,6 @@ namespace Lifes
         public CreateWorld world = new CreateWorld();
         Texture2D pixel;
         const int tileSize = 32;
-
-        Color GetColorByTerrain(TerrainType t)
-        {
-            switch (t)
-            {
-                case TerrainType.Water: return Color.Blue;
-                case TerrainType.Plain: return Color.LightGreen;
-                case TerrainType.Forest: return Color.DarkGreen;
-                case TerrainType.Mountain: return Color.SaddleBrown;
-                default: return Color.Black;
-            }
-        }
-
         public MainGame(GraphicsDevice device)
         {
             graphicsDevice = device;
@@ -97,12 +84,6 @@ namespace Lifes
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach (var c in creatures)
-                c.Draw(spriteBatch);
-
-            foreach (var f in foods)
-                f.Draw(spriteBatch);
-
             // ★地形描画を追加
             for (int x = 0; x < world.Width; x++)
                 for (int y = 0; y < world.Height; y++)
@@ -120,6 +101,12 @@ namespace Lifes
                     Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
                     spriteBatch.Draw(pixel, rect, color);
                 }
+            
+            foreach (var c in creatures)
+                c.Draw(spriteBatch);
+
+            foreach (var f in foods)
+                f.Draw(spriteBatch);
         }
     }
 
