@@ -28,7 +28,7 @@ namespace Lifes
               .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public CreateWorld(int width = 100, int height = 100, float scale = 0.2f, string seed = "")
+        public CreateWorld(int width = 100, int height = 100, float scale = 0.5f, string seed = "")
         {
             Width = width;
             Height = height;
@@ -38,6 +38,30 @@ namespace Lifes
             }
             perlinNoise = new PerlinNoise(seed);
             TerrainMap = new TerrainType[Width, Height];
+
+            // ★ここで地形を実際に生成
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    float noise = perlinNoise.Noise(x * scale, y * scale);
+                    if (noise < 0.35f)
+                        TerrainMap[x, y] = TerrainType.Water;
+                    else if (noise < 0.5f)
+                        TerrainMap[x, y] = TerrainType.Plain;
+                    else if (noise < 0.7f)
+                        TerrainMap[x, y] = TerrainType.Forest;
+                    else
+                        TerrainMap[x, y] = TerrainType.Mountain;
+                }
+            }
+        }
+
+        public TerrainType GetTerrain(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
+                throw new ArgumentOutOfRangeException();
+            return TerrainMap[x, y];
         }
     }
 }

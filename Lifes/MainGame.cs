@@ -103,9 +103,23 @@ namespace Lifes
             foreach (var f in foods)
                 f.Draw(spriteBatch);
 
-
-
-            
+            // ★地形描画を追加
+            for (int x = 0; x < world.Width; x++)
+                for (int y = 0; y < world.Height; y++)
+                {
+                    TerrainType type = world.GetTerrain(x, y);
+                    Color color;
+                    switch (type)
+                    {
+                        case TerrainType.Water: color = Color.Blue; break;
+                        case TerrainType.Plain: color = Color.LightGreen; break;
+                        case TerrainType.Forest: color = Color.DarkGreen; break;
+                        case TerrainType.Mountain: color = Color.SaddleBrown; break;
+                        default: color = Color.Black; break;
+                    }
+                    Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
+                    spriteBatch.Draw(pixel, rect, color);
+                }
         }
     }
 
