@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,16 +44,13 @@ namespace Lifes
 
         public void Update(GameTime gameTime)
         {
-            foreach (var c in creatures)
+            Parallel.ForEach(creatures, c => c.Update(gameTime));
+            foreach (var c in creatures.ToList())
             {
-                c.Update(gameTime);
                 if (!c.IsAlive)
-                {
                     creatures.Remove(c);
-                    break;
-                }
             }
-            
+
 
             foreach (var f in foods)
                 f.Update((float)gameTime.ElapsedGameTime.TotalSeconds);

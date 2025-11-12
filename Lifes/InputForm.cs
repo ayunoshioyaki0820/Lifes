@@ -14,6 +14,7 @@ namespace Lifes
     public class InputForm
     {
         public String text = "";
+        String BaseText = "Click to write...";
         bool focused = false;
         Rectangle formRect;
         MouseState _mouse;
@@ -21,14 +22,19 @@ namespace Lifes
         KeyboardState _key;
         KeyboardState _previousKey;
 
+        SpriteFont font;
+
         Vector2 textPos;
+        Vector2 cursorPos;
+        float textWidth;
+
+        float _time;
         internal InputForm(Rectangle form, SpriteFont font, int limit = 32)
         {
             text = "";
             formRect = form;
-            var textPos = new Vector2(formRect.X + 8, formRect.Y + (formRect.Height - font.MeasureString(text).Y) / 2);
-            formRect.Height = (int)textPos.Y;
-
+            textPos = new Vector2(formRect.X + 8, formRect.Y + (formRect.Height - font.MeasureString(text).Y) / 4);
+            this.font = font;
         }
         void charInput(char c)
         {
@@ -36,7 +42,7 @@ namespace Lifes
         }
         void Input()
         {
-            if(_key != _previousKey)
+            if (_key != _previousKey)
             {
                 foreach (var k in _key.GetPressedKeys())
                 {
@@ -44,11 +50,11 @@ namespace Lifes
                     {
                         if (k == Keys.Back && text.Length > 0)
                         {
-                            text = text.Substring(0, text.Length - 1);
+                            text = text[..^1];
                         }
                         else
                         {
-                            var keyString = k.ToString();
+                            var keyString = k.ToString().ToLower();
                             if (keyString.Length == 1)
                             {
                                 charInput(keyString[0]);
@@ -74,41 +80,52 @@ namespace Lifes
         {
             if (_mouse.LeftButton == ButtonState.Released && _previousMouse.LeftButton == ButtonState.Pressed)
             {
-                if (formRect.Contains(_mouse.Position))
-                {
-                    Input();
-                    focused = true;
-                }
+                if (formRect.Contains(_mouse.Position)) focused = true;
                 else focused = false;
             }
+            if (focused)
+            {
+                Input();
+            }
         }
-        internal void Update(KeyboardState key, MouseState mouse)
+        internal void Update(KeyboardState key, MouseState mouse, GameTime gameTime)
         {
             _previousKey = _key;
             _previousMouse = _mouse;
             _key = key;
             _mouse = mouse;
             CheckFocus();
+
+            _time += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (_time >= 1f)
+            {
+                _time = 0f;
+            }
+            textWidth = font.MeasureString(text).X;
+            cursorPos = new Vector2(textPos.X + textWidth + 2, textPos.Y);
         }
-        internal void Draw(SpriteBatch spriteBatch, SpriteFont font, Texture2D texture, Color borderColor)
+        internal void Draw(SpriteBatch spriteBatch, Texture2D texture, Color borderColor)
         {
             // Draw text box background
             spriteBatch.Draw(texture, formRect, Color.LightGray);
 
 
-            // 枠線（上・下・左・右）
+            //// 枠線（上・下・左・右）
             spriteBatch.Draw(texture, new Rectangle(formRect.Left, formRect.Top, formRect.Width, 2), borderColor);
             spriteBatch.Draw(texture, new Rectangle(formRect.Left, formRect.Bottom - 2, formRect.Width, 2), borderColor);
             spriteBatch.Draw(texture, new Rectangle(formRect.Left, formRect.Top, 2, formRect.Height), borderColor);
             spriteBatch.Draw(texture, new Rectangle(formRect.Right - 2, formRect.Top, 2, formRect.Height), borderColor);
             // Draw text
-            textPos = new Vector2(formRect.X + 8, formRect.Y + (formRect.Height - font.MeasureString(text).Y) / 2);
-            spriteBatch.DrawString(font, text, textPos, Color.Black);
-            if (focused)
+            if (text.Length == 0 && !focused)
             {
-                // Draw cursor
-                var textWidth = font.MeasureString(text).X;
-                var cursorPos = new Vector2(textPos.X + textWidth + 2, textPos.Y);
+                spriteBatch.DrawString(font, BaseText, textPos, Color.DarkGray);
+            }
+            else
+            {
+                spriteBatch.DrawString(font, text, textPos, Color.Black);
+            }
+            if (focused && _time < 0.5f)
+            {
                 spriteBatch.DrawString(font, "|", cursorPos, Color.Black);
             }
         }

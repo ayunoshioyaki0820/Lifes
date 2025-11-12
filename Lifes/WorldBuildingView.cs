@@ -44,7 +44,7 @@ namespace Lifes
         public void Update(GameTime gameTime, KeyboardState key, MouseState mouse)
         {
             Isfocus(mouse, rectangle);
-            inputBox.Update(key, mouse);
+            inputBox.Update(key, mouse, gameTime);
         }
 
         public void Draw(SpriteBatch spriteBatch, SpriteFont font)
@@ -53,7 +53,7 @@ namespace Lifes
             var size = font.MeasureString("World Building View (est to back)");
             spriteBatch.DrawString(font, "World Building View (est to back)", new Vector2(centerX - size.X / 2, 20), Color.White);
 
-            inputBox.Draw(spriteBatch, font, whitePixel, Color.White);
+            inputBox.Draw(spriteBatch, whitePixel, Color.White);
         }
     }
 }
