@@ -3,7 +3,7 @@
   <Asset Type="Graphics:FontDescription">
     <FontName>Consolas</FontName>
     <Size>16</Size>
-    <Spacing>1</Spacing>
+    <Spacing>2</Spacing>
     <UseKerning>false</UseKerning>
     <Style>Regular</Style>
     <DefaultCharacter>*</DefaultCharacter>
