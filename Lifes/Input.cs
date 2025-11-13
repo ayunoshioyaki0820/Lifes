@@ -2,45 +2,56 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 #nullable enable
 
 namespace Lifes
 {
     internal abstract class InputBase
     {
-        protected Rectangle rectangle;
+        protected Rectangle InputRect;
+        protected Vector2 LabelPoint;
         protected string label;
         protected bool isActive;
         protected bool isHovered;
+        protected float time;
+        protected SpriteFont font;
+        protected int fontHeight;
+        protected int Height;
 
-        public InputBase(Rectangle rectangle, string label)
+        public InputBase(Rectangle InputRect, string label, SpriteFont font)
         {
-            this.rectangle = rectangle;
+            this.InputRect = InputRect;
             this.label = label;
+            this.font = font;
+            this.fontHeight = font.LineSpacing;
+            this.Height = InputRect.Height;
+            LabelPoint = new Vector2(InputRect.X, InputRect.Y);
+            this.InputRect.Y -= fontHeight;
         }
 
         public virtual void Update(MouseState mouse, KeyboardState keyboard)
         {
             Point mousePos = new Point(mouse.X, mouse.Y);
-            isHovered = rectangle.Contains(mousePos);
+            isHovered = InputRect.Contains(mousePos);
             if (isHovered && mouse.LeftButton == ButtonState.Pressed)
                 isActive = true;
             else if (mouse.LeftButton == ButtonState.Pressed && !isHovered)
                 isActive = false;
+            time += 0.16f;
+            if (time >= 1f)
+                time = 0f;
         }
 
-        public abstract void Draw(SpriteBatch spriteBatch, SpriteFont font, Texture2D texture);
+        public abstract void Draw(SpriteBatch spriteBatch, Texture2D texture);
     }
 
     internal class TextInput : InputBase
     {
         private string value = "";
 
-        public TextInput(Rectangle rect, string label) : base(rect, label) { }
+        public TextInput(Rectangle rect, string label, SpriteFont font) : base(rect, label, font) {
+            this.Height += fontHeight;
+        }
 
         public override void Update(MouseState mouse, KeyboardState keyboard)
         {
@@ -58,11 +69,11 @@ namespace Lifes
             }
         }
 
-        public override void Draw(SpriteBatch spriteBatch, SpriteFont font, Texture2D texture)
+        public override void Draw(SpriteBatch spriteBatch, Texture2D texture)
         {
             var color = isActive ? Color.LightBlue : (isHovered ? Color.Gray : Color.White);
-            spriteBatch.Draw(texture, rectangle, color);
-            spriteBatch.DrawString(font, $"{label}: {value}", new Vector2(rectangle.X + 5, rectangle.Y + 5), Color.Black);
+            spriteBatch.DrawString(font, label, LabelPoint, Color.Black);
+            spriteBatch.Draw(texture, InputRect, color);
         }
     }
 
@@ -70,7 +81,7 @@ namespace Lifes
     {
         private int value = 0;
 
-        public NumberInput(Rectangle rect, string label) : base(rect, label) { }
+        public NumberInput(Rectangle rect, string label, Vector2 point, SpriteFont font) : base(rect, label, font) { }
 
         public override void Update(MouseState mouse, KeyboardState keyboard)
         {
@@ -83,11 +94,11 @@ namespace Lifes
             }
         }
 
-        public override void Draw(SpriteBatch spriteBatch, SpriteFont font, Texture2D texture)
+        public override void Draw(SpriteBatch spriteBatch, Texture2D texture)
         {
             var color = isActive ? Color.LightBlue : (isHovered ? Color.Gray : Color.White);
-            spriteBatch.Draw(texture, rectangle, color);
-            spriteBatch.DrawString(font, $"{label}: {value}", new Vector2(rectangle.X + 5, rectangle.Y + 5), Color.Black);
+            spriteBatch.Draw(texture, InputRect, color);
+            spriteBatch.DrawString(font, $"{label}: {value}", new Vector2(InputRect.X + 5, InputRect.Y + 5), Color.Black);
         }
     }
 
@@ -95,7 +106,7 @@ namespace Lifes
     {
         private Action? onClick;
 
-        public ButtonInput(Rectangle rect, string label, Action? onClick = null) : base(rect, label)
+        public ButtonInput(Rectangle rect, string label, SpriteFont font, Action? onClick = null) : base(rect, label, font)
         {
             this.onClick = onClick;
         }
@@ -103,17 +114,17 @@ namespace Lifes
         public override void Update(MouseState mouse, KeyboardState keyboard)
         {
             Point mousePos = new Point(mouse.X, mouse.Y);
-            bool hovered = rectangle.Contains(mousePos);
+            bool hovered = InputRect.Contains(mousePos);
 
             if (hovered && mouse.LeftButton == ButtonState.Pressed)
                 onClick?.Invoke();
         }
 
-        public override void Draw(SpriteBatch spriteBatch, SpriteFont font, Texture2D texture)
+        public override void Draw(SpriteBatch spriteBatch, Texture2D texture)
         {
             var color = isHovered ? Color.Gray : Color.White;
-            spriteBatch.Draw(texture, rectangle, color);
-            spriteBatch.DrawString(font, label, new Vector2(rectangle.X + 10, rectangle.Y + 10), Color.Black);
+            spriteBatch.Draw(texture, InputRect, color);
+            spriteBatch.DrawString(font, label, new Vector2(InputRect.X + 10, InputRect.Y + 10), Color.Black);
         }
     }
 
