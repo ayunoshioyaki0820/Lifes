@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Lifes
 {
@@ -38,7 +39,6 @@ namespace Lifes
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
             base.Initialize();
         }
 
@@ -182,6 +182,7 @@ namespace Lifes
 
             previousKeyboardState = key;
             previousMouseState = mouse;
+
             base.Update(gameTime);
         }
 
@@ -209,7 +210,6 @@ namespace Lifes
                     var size = pixelFont.MeasureString(text) * 2;
                     _spriteBatch.DrawString(pixelFont, text, new Vector2(centerX - size.X / 2, centerY + 20 + i * 50), color, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
                 }
-
                 _spriteBatch.End();
             } else if (currentState == GameState.WorldBuilding)
             {
@@ -230,7 +230,6 @@ namespace Lifes
                 _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _camera.GetViewMatrix(_graphics));
                 // ゲーム画面描画
                 game.Draw(_spriteBatch);
-
                 _spriteBatch.End();
             }
 
