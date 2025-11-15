@@ -11,49 +11,46 @@ namespace Lifes
 {
     internal class WorldBuildingView
     {
-        private int focusIndex = 0;
-        private string[] focusState = { "None", "Input" };
         private Texture2D whitePixel;
         Rectangle rectangle;
-        InputForm inputBox;
+        TextInput inputBox;
+        ButtonInput button;
+        NumberInput numberInput;
+        Grid<NumberInput> grid;
         public WorldBuildingView(GraphicsDevice device, SpriteFont font)
         {
             whitePixel = new Texture2D(device, 1, 1);
             whitePixel.SetData(new[] { Color.White });
             var centerX = device.Viewport.Width / 2;
-            rectangle = new Rectangle(centerX - 150, 50, 300, 40);
-            inputBox = new InputForm(rectangle, font);
-        }
-
-        void Isfocus(MouseState mouse, Rectangle rect)
-        {
-            if(mouse.LeftButton == ButtonState.Released && GameManager.previousMouseState.LeftButton == ButtonState.Pressed)
-            {
-                if (rect.Contains(mouse.Position))
-                {
-                    focusIndex = 1; // Input
-                }
-                else
-                {
-                    focusIndex = 0; // None
-                }
-            }
+            rectangle = new Rectangle(centerX /2, 50, centerX, 40);
+            inputBox = new TextInput(rectangle, "World Name", font);
+            button = new ButtonInput(new Rectangle(centerX / 2, inputBox.Bottom, centerX, 40), "Create", font);
+            numberInput = new NumberInput(new Rectangle(centerX / 2, button.Bottom, centerX, 40), "Size", font);
+            var widthInput = new NumberInput(new Rectangle(centerX / 2, numberInput.Bottom, centerX, 40), "Width", font);
+            var heightInput = new NumberInput(new Rectangle(centerX / 2, widthInput.Bottom, centerX, 40), "Height", font);
+            var inputGrid = new List<NumberInput> { widthInput, heightInput };
+            grid = new Grid<NumberInput>(font, inputGrid, 10);
         }
 
 
         public void Update(GameTime gameTime, KeyboardState key, MouseState mouse)
         {
-            Isfocus(mouse, rectangle);
-            inputBox.Update(key, mouse, gameTime);
+            inputBox.Update(mouse, key, gameTime);
+            button.Update(mouse, key, gameTime);
+            numberInput.Update(mouse, key, gameTime);
+            grid.Update(gameTime, key, mouse);
         }
 
         public void Draw(SpriteBatch spriteBatch, SpriteFont font)
         {
             var centerX = spriteBatch.GraphicsDevice.Viewport.Width / 2;
             var size = font.MeasureString("World Building View (est to back)");
-            spriteBatch.DrawString(font, "World Building View (est to back)", new Vector2(centerX - size.X / 2, 20), Color.White);
+            spriteBatch.DrawString(font, "World Building View (est to back)", new Vector2(centerX / 2, 20), Color.White);
 
-            inputBox.Draw(spriteBatch, whitePixel, Color.White);
+            inputBox.Draw(spriteBatch, whitePixel);
+            button.Draw(spriteBatch, whitePixel);
+            numberInput.Draw(spriteBatch, whitePixel);
+            grid.Draw(spriteBatch, whitePixel);
         }
     }
 }
