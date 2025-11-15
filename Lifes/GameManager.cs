@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Lifes
@@ -29,6 +30,8 @@ namespace Lifes
         public static KeyboardState previousKeyboardState;
         public static MouseState previousMouseState;
 
+        private static Version version;
+
         public GameManager()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -49,8 +52,14 @@ namespace Lifes
             // TODO: use this.Content to load your game content here
             pixelFont = Content.Load<SpriteFont>("PixelFont");
             pixelFontTitle = Content.Load<SpriteFont>("PixelFontTitle");
+            using (var stream = TitleContainer.OpenStream("Content/Settings/version.txt"))
+            using (var reader = new System.IO.StreamReader(stream))
+            {
+                var versionString = reader.ReadToEnd().Trim();
+                version = new Version(versionString);
+            }
 
-            game = new MainGame(GraphicsDevice);
+                game = new MainGame(GraphicsDevice);
             worldBuildingView = new WorldBuildingView(GraphicsDevice, pixelFont);
             _camera = new Camera();
         }
@@ -210,6 +219,9 @@ namespace Lifes
                     var size = pixelFont.MeasureString(text) * 2;
                     _spriteBatch.DrawString(pixelFont, text, new Vector2(centerX - size.X / 2, centerY + 20 + i * 50), color, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
                 }
+                var versionText = $"Version: {version}";
+                var versionSize = pixelFont.MeasureString(versionText);
+                _spriteBatch.DrawString(pixelFont, versionText, new Vector2(_graphics.PreferredBackBufferWidth - versionSize.X - 10, _graphics.PreferredBackBufferHeight - versionSize.Y - 10), Color.White);
                 _spriteBatch.End();
             } else if (currentState == GameState.WorldBuilding)
             {
