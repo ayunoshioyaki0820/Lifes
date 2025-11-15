@@ -42,12 +42,8 @@ namespace Lifes
             rectangle = new Rectangle(centerX / 2, 50, centerX, 40);
 
             inputBox = new TextInput(rectangle, "World Name", font);
-            button = new ButtonInput(
-                new Rectangle(centerX / 2, inputBox.Bottom, centerX, 40),
-                "Create", font
-            );
             numberInput = new NumberInput(
-                new Rectangle(centerX / 2, button.Bottom, centerX, 40),
+                new Rectangle(centerX / 2, inputBox.Bottom, centerX, 40),
                 "Size", font
             );
 
@@ -60,7 +56,13 @@ namespace Lifes
                 "Height", font
             );
 
-            grid = new Grid<NumberInput>(font, new List<NumberInput> { widthInput, heightInput }, 10);
+            grid = new Grid<NumberInput>(font, new List<NumberInput> { widthInput, heightInput }, centerX, GridOrientation.Horizontal, 4);
+
+
+            button = new ButtonInput(
+                new Rectangle(centerX / 2, grid.Bottom, centerX, 40),
+                "Create", font
+            );
         }
 
 

@@ -10,16 +10,16 @@ namespace Lifes
 {
     internal abstract class InputBase
     {
-        protected Rectangle InputRect;
+        internal Rectangle InputRect;
         protected Rectangle[] border;
-        protected Vector2 LabelPoint;
-        protected string label;
+        internal Vector2 LabelPoint;
+        internal string label;
         protected bool isActive;
         protected bool isHovered;
         protected float time;
         protected SpriteFont font;
-        protected int fontHeight;
-        protected int Width, Height;
+        internal int fontHeight;
+        internal int Width, Height;
         internal int Top, Bottom, Left, Right;
 
         public InputBase(Rectangle BaseInputRect, string label, SpriteFont font)
@@ -29,6 +29,16 @@ namespace Lifes
             fontHeight = font.LineSpacing;
             InputRect = new Rectangle(BaseInputRect.X, BaseInputRect.Y + fontHeight, BaseInputRect.Width, BaseInputRect.Height);
             InitializeLayout(BaseInputRect);
+            border =
+            [
+                new Rectangle(Left, Top, Width, 2),
+                new Rectangle(Left, Bottom - 2, Width, 2),
+                new Rectangle(Left, Top, 2, Height),
+                new Rectangle(Right - 2, Top, 2, Height)
+            ];
+        }
+        internal virtual void InitializeLayout(Rectangle rect)
+        {
             Width = InputRect.Width;
             Height = InputRect.Height;
             Top = InputRect.Top;
@@ -44,11 +54,10 @@ namespace Lifes
                 new Rectangle(Right - 2, Top, 2, Height)
             ];
         }
-        protected abstract void InitializeLayout(Rectangle rect);
 
         public virtual void Update(MouseState mouse, KeyboardState keyboard, GameTime time)
         {
-            Point mousePos = new Point(mouse.X, mouse.Y);
+            Point mousePos = new(mouse.X, mouse.Y);
             isHovered = InputRect.Contains(mousePos);
             if (isHovered && mouse.LeftButton == ButtonState.Pressed)
                 isActive = true;
@@ -75,7 +84,7 @@ namespace Lifes
         private Vector2 valuePoint;
         private bool isShift = false;
 
-        void charInput(char c)
+        void CharInput(char c)
         {
             value += c;
         }
@@ -107,33 +116,33 @@ namespace Lifes
                             if (keyString.Length == 1)
                             {
                                 if (isShift)
-                                    charInput(char.ToUpper(keyString[0]));
+                                    CharInput(char.ToUpper(keyString[0]));
                                 else
-                                    charInput(char.ToLower(keyString[0]));
+                                    CharInput(char.ToLower(keyString[0]));
                             }
-                            else if (keyString.StartsWith("D") && keyString.Length == 2)
+                            else if (keyString.StartsWith('D') && keyString.Length == 2)
                             {
                                 if (isShift)
-                                    charInput(Data.NumbersShift[keyString[1].ToString()]);
+                                    CharInput(Data.NumbersShift[keyString[1].ToString()]);
                                 else
                                 {
-                                    charInput(keyString[1]);
+                                    CharInput(keyString[1]);
                                 }
                             }
                             else if (keyString.StartsWith("NumPad") && keyString.Length == 7)
                             {
-                                charInput(keyString[6]);
+                                CharInput(keyString[6]);
                             }
                             else if (keyString.StartsWith("Oem"))
                             {
                                 if (isShift)
-                                    charInput(Data.OemShift[keyString]);
+                                    CharInput(Data.OemShift[keyString]);
                                 else
-                                    charInput(Data.OemNoShift[keyString]);
+                                    CharInput(Data.OemNoShift[keyString]);
                             }
                             else if (k == Keys.Space)
                             {
-                                charInput(' ');
+                                CharInput(' ');
                             }
                             else if (k == Keys.Enter)
                             {
@@ -147,8 +156,9 @@ namespace Lifes
 
         public TextInput(Rectangle rect, string label, SpriteFont font) : base(rect, label, font) { }
 
-        protected override void InitializeLayout(Rectangle rect)
+        internal override void InitializeLayout(Rectangle rect)
         {
+            base.InitializeLayout(rect);
             LabelPoint = new Vector2(rect.X, rect.Y);
             cursor = new Rectangle(InputRect.X + 5, InputRect.Y + (InputRect.Height - fontHeight) / 2, 2, fontHeight);
             valuePoint = new Vector2(cursor.X, cursor.Y + 3);
@@ -174,15 +184,17 @@ namespace Lifes
         public override void Draw(SpriteBatch spriteBatch, Texture2D texture)
         {
             var color = isHovered ? Color.WhiteSmoke : Color.White;
-            spriteBatch.DrawString(font, label, LabelPoint, Color.White);
             spriteBatch.Draw(texture, InputRect, color);
             if (isActive && time < 0.75f)
             {
                 spriteBatch.Draw(texture, cursor, Color.Black);
             }
-            spriteBatch.DrawString(font, value, valuePoint, Color.Black);
 
             base.Draw(spriteBatch, texture);
+
+
+            spriteBatch.DrawString(font, value, valuePoint, Color.Black);
+            spriteBatch.DrawString(font, label, LabelPoint, Color.White);
         }
     }
 
@@ -198,8 +210,9 @@ namespace Lifes
         public NumberInput(Rectangle rect, string label,SpriteFont font, bool isMinus = false) : base(rect, label, font) {
             this.isMinus = isMinus;
         }
-        protected override void InitializeLayout(Rectangle rect)
+        internal override void InitializeLayout(Rectangle rect)
         {
+            base.InitializeLayout(rect);
             LabelPoint = new Vector2(rect.X, rect.Y);
             cursor = new Rectangle(InputRect.X + 5, InputRect.Y + (InputRect.Height - fontHeight) / 2, 2, fontHeight);
             valuePoint = new Vector2(cursor.X, cursor.Y + 3);
@@ -264,15 +277,16 @@ namespace Lifes
         public override void Draw(SpriteBatch spriteBatch, Texture2D texture)
         {
             var color = isHovered ? Color.WhiteSmoke : Color.White;
-            spriteBatch.DrawString(font, label, LabelPoint, Color.White);
             spriteBatch.Draw(texture, InputRect, color);
             if (isActive && time < 0.75f)
             {
                 spriteBatch.Draw(texture, cursor, Color.Black);
             }
-            spriteBatch.DrawString(font, valueString, valuePoint, Color.Black);
 
             base.Draw(spriteBatch, texture);
+            spriteBatch.DrawString(font, valueString, valuePoint, Color.Black);
+            spriteBatch.DrawString(font, label, LabelPoint, Color.White);
+            
         }
     }
 
@@ -296,14 +310,15 @@ namespace Lifes
                 };
             }
         }
-        protected override void InitializeLayout(Rectangle rect)
+        internal override void InitializeLayout(Rectangle rect)
         {
             InputRect.Y -= fontHeight;
+            base.InitializeLayout(rect);
         }
 
         public override void Update(MouseState mouse, KeyboardState keyboard, GameTime g)
         {
-            Point mousePos = new Point(mouse.X, mouse.Y);
+            Point mousePos = new(mouse.X, mouse.Y);
             isHovered = InputRect.Contains(mousePos);
             isPressedNow = mouse.LeftButton == ButtonState.Pressed;
             wasPressed = GameManager.previousMouseState.LeftButton == ButtonState.Pressed;
