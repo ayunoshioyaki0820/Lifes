@@ -78,6 +78,7 @@ namespace Lifes
     internal class TextInput : InputBase
     {
         private string value = "";
+        internal string valueSetter { get { return value; } set { this.value = value; } }
         private Rectangle cursor;
         private KeyboardState _key;
         private KeyboardState _previousKey;
@@ -201,6 +202,7 @@ namespace Lifes
     internal class NumberInput : InputBase
     {
         private int value = 0;
+        internal int valueSetter { get { return value; } set { this.value = value; } }
         private string valueString = "";
         private bool isMinus;
         private Rectangle cursor;

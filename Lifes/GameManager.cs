@@ -18,25 +18,36 @@ namespace Lifes
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         
-        private GameState currentState = GameState.Menu;
+        private static GameState currentState;
+        internal static GameState currentStateSetter { get => currentState; set => currentState = value; }
         public SpriteFont pixelFont, pixelFontTitle;
 
-        private int selectedIndex = 0;
-        private string[] menuItems = { "NewGame", "Continue", "Exit" };
+        private int selectedIndex;
+        private string[] menuItems;
 
         private MainGame game;
+        public static CreateWorld world;
         private WorldBuildingView worldBuildingView;
         Camera _camera;
         public static KeyboardState previousKeyboardState;
         public static MouseState previousMouseState;
 
         private static Version version;
+        private int fpsCount;
+        private int fps;
+        private double Sec;
 
         public GameManager()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            menuItems =
+            [
+                "New World",
+                "Continue",
+                "Exit"
+            ];
         }
 
         protected override void Initialize()
@@ -59,8 +70,8 @@ namespace Lifes
                 version = new Version(versionString);
             }
 
-                game = new MainGame(GraphicsDevice);
-            worldBuildingView = new WorldBuildingView(GraphicsDevice, pixelFont);
+            game = new MainGame(GraphicsDevice);
+            worldBuildingView = new WorldBuildingView(GraphicsDevice, pixelFont, CreateWorld.GenerateRandomString(16));
             _camera = new Camera();
         }
 
@@ -68,7 +79,6 @@ namespace Lifes
         {
             var key = Keyboard.GetState();
             var mouse = Mouse.GetState();
-
             if (currentState == GameState.Menu)
             {
                 if ((key.IsKeyDown(Keys.Up) && previousKeyboardState.IsKeyUp(Keys.Up)))
@@ -192,6 +202,15 @@ namespace Lifes
             previousKeyboardState = key;
             previousMouseState = mouse;
 
+            Sec += gameTime.ElapsedGameTime.TotalSeconds;
+            if(Sec < 1)
+                fpsCount++;
+            else
+            {
+                fps = fpsCount;
+                Sec = 0;
+                fpsCount = 0;
+            }
             base.Update(gameTime);
         }
 
@@ -244,6 +263,10 @@ namespace Lifes
                 game.Draw(_spriteBatch);
                 _spriteBatch.End();
             }
+
+            _spriteBatch.Begin();
+            _spriteBatch.DrawString(pixelFont, $"FPS: {fps}", new Vector2(0,0), Color.White);
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }

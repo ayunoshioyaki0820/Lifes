@@ -75,7 +75,6 @@ namespace Lifes
                 input.LabelPoint = new Vector2(
                     input.InputRect.X,  y - input.fontHeight
                 );
-                Console.WriteLine(input.LabelPoint);
             }
         }
 

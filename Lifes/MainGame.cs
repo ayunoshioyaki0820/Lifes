@@ -21,8 +21,7 @@ namespace Lifes
         private double evolveTimer = 0;
         private GraphicsDevice graphicsDevice;
         public SpriteFont pixelFont;
-
-        public CreateWorld world = new CreateWorld();
+        string seed ;
         Texture2D pixel;
         const int tileSize = 32;
         public MainGame(GraphicsDevice device)
@@ -44,6 +43,7 @@ namespace Lifes
 
         public void Update(GameTime gameTime)
         {
+           
             Parallel.ForEach(creatures, c => c.Update(gameTime));
             foreach (var c in creatures.ToList())
             {
@@ -83,10 +83,10 @@ namespace Lifes
         public void Draw(SpriteBatch spriteBatch)
         {
             // ★地形描画を追加
-            for (int x = 0; x < world.Width; x++)
-                for (int y = 0; y < world.Height; y++)
+            for (int x = 0; x < GameManager.world.Width; x++)
+                for (int y = 0; y < GameManager.world.Height; y++)
                 {
-                    TerrainType type = world.GetTerrain(x, y);
+                    TerrainType type = GameManager.world.GetTerrain(x, y);
                     Color color;
                     switch (type)
                     {
