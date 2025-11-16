@@ -1,5 +1,4 @@
 # Used
-.NET
+.NET 8.0
 MonoGame
 
-Don't copy please.
