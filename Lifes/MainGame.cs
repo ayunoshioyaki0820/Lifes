@@ -21,6 +21,7 @@ namespace Lifes
         private double evolveTimer = 0;
         private GraphicsDevice graphicsDevice;
         public SpriteFont pixelFont;
+        public int CreaturesCount = 0;
         string seed ;
         Texture2D pixel;
         const int tileSize = 32;
@@ -51,7 +52,7 @@ namespace Lifes
                     creatures.Remove(c);
             }
 
-
+            CreaturesCount = creatures.Count;
             foreach (var f in foods)
                 f.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -65,15 +66,11 @@ namespace Lifes
             testCountes += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (testCountes > 1f)
             {
-                Console.WriteLine($"Creatures: {creatures.Count}, Foods: {foods.Count}");
 
                 // 位置情報を文字列でまとめる
                 var positions = creatures
                     .Select(c => $"({(int)c.Position.X}, {(int)c.Position.Y})")
                     .ToList();
-
-                Console.WriteLine("Creature positions: " + string.Join(", ", positions));
-
                 testCountes = 0f;
             }
 

@@ -269,6 +269,9 @@ namespace Lifes
                 // ゲーム画面描画
                 game.Draw(_spriteBatch);
                 _spriteBatch.End();
+                _spriteBatch.Begin();
+                _spriteBatch.DrawString(pixelFont, "Creatures:" +game.CreaturesCount.ToString(), new Vector2(0, 20), Color.White);
+                _spriteBatch.End();
             }
 
             _spriteBatch.Begin();

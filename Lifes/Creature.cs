@@ -56,8 +56,8 @@ class Creature
     public Creature(Creature parent1, Creature parent2, GraphicsDevice device)
     {
         // --- 1. IDと親情報の生成 ---
-        this.id = Guid.NewGuid().ToString(); // ユニークID
-        this.parents = new string[2] { parent1.id, parent2.id };
+        id = Guid.NewGuid().ToString(); // ユニークID
+        parents = new string[2] { parent1.id, parent2.id };
 
         // --- 2. DNAの生成 (交叉・突然変異) ---
         int len1 = parent1.Dna.Length;
