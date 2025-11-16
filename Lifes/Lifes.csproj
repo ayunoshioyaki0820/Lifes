@@ -30,6 +30,9 @@
     <Folder Include="Content\Saves\Worlds\" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Content\Icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\Settings\Version.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

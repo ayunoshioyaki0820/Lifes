@@ -21,6 +21,9 @@ namespace Lifes
         private static GameState currentState;
         internal static GameState currentStateSetter { get => currentState; set => currentState = value; }
         public SpriteFont pixelFont, pixelFontTitle;
+        private Texture2D Logo;
+        private Rectangle LogoRect;
+        private Vector2 LogoPosition;
 
         private int selectedIndex;
         private string[] menuItems;
@@ -63,6 +66,9 @@ namespace Lifes
             // TODO: use this.Content to load your game content here
             pixelFont = Content.Load<SpriteFont>("PixelFont");
             pixelFontTitle = Content.Load<SpriteFont>("PixelFontTitle");
+            Logo = Content.Load<Texture2D>("logo");
+
+
             using (var stream = TitleContainer.OpenStream("Content/Settings/version.txt"))
             using (var reader = new System.IO.StreamReader(stream))
             {
@@ -229,7 +235,8 @@ namespace Lifes
 
                 var title = "Lifes";
                 var titleSize = pixelFontTitle.MeasureString(title);
-                _spriteBatch.DrawString(pixelFontTitle, title, new Vector2((float)centerX - titleSize.X, centerY - 180), Color.White, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
+                LogoPosition = new Vector2(centerX - Logo.Width /2, centerY - Logo.Height);
+                _spriteBatch.Draw(Logo, LogoPosition, Color.White);
 
                 for (int i = 0; i < menuItems.Length; i++)
                 {
