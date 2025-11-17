@@ -32,6 +32,8 @@ class Creature
     public Color Color2; // (★追加) アクセント色
     public float Size;
     public float Speed;
+    public int Helth;
+    public int MaxHelth;
     //public float MutationRate; // (現在DNAから設定されていませんが、将来的に拡張可能です)
     public byte[,] looks; // 見た目 (テクスチャデータ)
     public Codon[] Dna { get; private set; }
@@ -108,7 +110,7 @@ class Creature
         DecodeDna(Dna);
 
         // --- 4. テクスチャの生成 ---
-        this.Texture = GenerateDotTexture(looks, device);
+        Texture = GenerateDotTexture(looks, device);
     }
 
     // ----------------------------------------------------
@@ -147,14 +149,16 @@ class Creature
     private void DecodeDna(Codon[] dna)
     {
         // デフォルト値
-        this.Color = Color.Gray;
-        this.Color2 = Color.White; // (★アクセント色)
-        this.Size = 8f;
-        this.Speed = 1.0f;
-        this.Position = new Vector2(_rand.Next(800), _rand.Next(480));
-        this.MaxAge = 1000f;
-        this.CurrentAge = 0f;
-        this.IsAlive = true;
+        Color = Color.Gray;
+        Color2 = Color.White; // (★アクセント色)
+        Size = 8f;
+        Speed = 1.0f;
+        MaxHelth = 100;
+        Helth = MaxHelth;
+        Position = new Vector2(_rand.Next(800), _rand.Next(480));
+        MaxAge = 1000f;
+        CurrentAge = 0f;
+        IsAlive = true;
 
         // 例1: 最初のコドン (dna[0]) で基本色
         if (dna.Length > 0)
@@ -162,21 +166,21 @@ class Creature
             byte r = (byte)((byte)dna[0].B1 * 64);
             byte g = (byte)((byte)dna[0].B2 * 64);
             byte b = (byte)((byte)dna[0].B3 * 64);
-            this.Color = new Color(r, g, b);
+            Color = new Color(r, g, b);
         }
 
         // 例2: 2番目のコドン (dna[1]) でサイズ
         if (dna.Length > 1)
         {
             float sizeValue = (float)((byte)dna[1].B1 + (byte)dna[1].B2 + (byte)dna[1].B3);
-            this.Size = 5.0f + sizeValue;
+            Size = 5.0f + sizeValue;
         }
 
         // 例3: 3番目のコドン (dna[2]) でスピード
         if (dna.Length > 2)
         {
             float speedValue = (float)((byte)dna[2].B1 + (byte)dna[2].B2 + (byte)dna[2].B3);
-            this.Speed = 0.5f + (speedValue / 10.0f);
+            Speed = 0.5f + (speedValue / 10.0f);
         }
 
         // 4番目のコドン (dna[3]) でアクセント色
@@ -185,14 +189,14 @@ class Creature
             byte r = (byte)((byte)dna[3].B3 * 64); // 基本色とRGBの順番を変えてみる
             byte g = (byte)((byte)dna[3].B2 * 64);
             byte b = (byte)((byte)dna[3].B1 * 64);
-            this.Color2 = new Color(r, g, b);
+            Color2 = new Color(r, g, b);
         }
 
         // 5番目のコドン (dna[4]) で寿命
         if (dna.Length > 4)
         {
             float lifeValue = (float)((byte)dna[4].B1 + (byte)dna[4].B2 + (byte)dna[4].B3);
-            this.MaxAge = 5f + (lifeValue * 2f);
+            MaxAge = 5f + (lifeValue * 2f);
         }
 
         // 6番目のコドン (dna[5]) でテクスチャサイズを決定
@@ -214,8 +218,14 @@ class Creature
         int halfWidth = (int)Math.Ceiling(width / 2.0);
         int requiredCodonsForLooks = halfWidth * height;
 
-        // looks の DNA はインデックス 5 から読み取る
-        int looksDnaStartIndex = 6;
+        // ここで体力
+        if(dna.Length > 5)
+        {
+            MaxHelth = ((byte)dna[6].B1 + 1)*((byte)dna[6].B2);
+        }
+
+        // looks の DNA はインデックス 6 から読み取る
+        int looksDnaStartIndex = 7;
 
         if (dna.Length > looksDnaStartIndex + requiredCodonsForLooks)
         {

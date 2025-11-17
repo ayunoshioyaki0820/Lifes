@@ -71,7 +71,8 @@ namespace Lifes
                 new Rectangle(centerX / 2, grid.Bottom, centerX, 40),
                 "Create", font, () =>
                 {
-                    GameManager.world = new CreateWorld(seed);
+                    GameManager.world = new World();
+                    GameManager.world.CreateWorld(seed);
                     GameManager.world.GenerateWorld();
                     GameManager.currentStateSetter = GameState.Playing;
                 }

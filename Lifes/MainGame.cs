@@ -22,9 +22,8 @@ namespace Lifes
         private GraphicsDevice graphicsDevice;
         public SpriteFont pixelFont;
         public int CreaturesCount = 0;
-        string seed ;
         Texture2D pixel;
-        const int tileSize = 32;
+        static int tileSize = 32;
         public MainGame(GraphicsDevice device)
         {
             graphicsDevice = device;
@@ -38,7 +37,7 @@ namespace Lifes
                     { 1,1,1,1 },
                     { 1,1,1,1 },
                     { 0,1,1,0 }
-                }, graphicsDevice));
+                }, new Vector2(100, 100),graphicsDevice));
         }
         private float testCountes = 0f;
 

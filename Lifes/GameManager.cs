@@ -22,14 +22,13 @@ namespace Lifes
         internal static GameState currentStateSetter { get => currentState; set => currentState = value; }
         public SpriteFont pixelFont, pixelFontTitle;
         private Texture2D Logo;
-        private Rectangle LogoRect;
         private Vector2 LogoPosition;
 
         private int selectedIndex;
         private string[] menuItems;
 
         private MainGame game;
-        public static CreateWorld world;
+        public static World world;
         private WorldBuildingView worldBuildingView;
         Camera _camera;
         public static KeyboardState previousKeyboardState;
@@ -77,7 +76,7 @@ namespace Lifes
             }
 
             game = new MainGame(GraphicsDevice);
-            worldBuildingView = new WorldBuildingView(GraphicsDevice, pixelFont, CreateWorld.GenerateRandomString(16));
+            worldBuildingView = new WorldBuildingView(GraphicsDevice, pixelFont, World.GenerateRandomString(18));
             _camera = new Camera();
         }
 
